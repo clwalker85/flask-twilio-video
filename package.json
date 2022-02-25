@@ -7,6 +7,6 @@
     "npm": "8.1.0"
   },
   "scripts": {
-    "build": "cd ./front-end && npm run build"
+    "build": "cd ./front-end && npm install && npm run build"
   }
 }
