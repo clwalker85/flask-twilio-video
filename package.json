@@ -10,6 +10,6 @@
     "front-end/node_modules"
   ],
   "scripts": {
-    "heroku-postbuild": "cd ./front-end && npm install && npm run build"
+    "heroku-postbuild": "cd ./front-end && npm install util && npm install && npm run build"
   }
 }
