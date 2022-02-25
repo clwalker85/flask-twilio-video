@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, abort
+from flask import Flask, request, abort
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from twilio.rest import Client
@@ -13,7 +13,7 @@ twilio_api_key_secret = os.environ.get('TWILIO_API_KEY_SECRET')
 twilio_client = Client(twilio_api_key_sid, twilio_api_key_secret,
                        twilio_account_sid)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./front-end/build', static_url_path='/')
 
 
 def get_chatroom(name):
@@ -28,7 +28,7 @@ def get_chatroom(name):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return app.send_static_file('index.html')
 
 
 @app.route('/login', methods=['POST'])

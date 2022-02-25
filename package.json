@@ -1,0 +1,8 @@
+{
+  "name": "flask-twilio-video",
+  "version": "0.1.0",
+  "description": "This is a simple web-based video conferencing application using Flask and Twilio Programmable Video.",
+  "scripts": {
+    "build": "cd ./front-end && npm run build"
+  }
+}
