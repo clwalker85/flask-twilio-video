@@ -5,8 +5,6 @@ import { createLocalVideoTrack } from 'twilio-video'
 import './ParticipantList.css';
 
 function ParticipantList(props) {
-  const [participants, setParticipants] = useState([]);
-
   useEffect(() => {
     createLocalVideoTrack().then((track) => {
       setParticipants([
@@ -19,9 +17,18 @@ function ParticipantList(props) {
     });
 
     return () => {
-      setParticipants([]);
+      setParticipants(participants.filter(p => p.sid == 'local'));
     }
-  }, []);
+  }, [props.token]);
+
+  const [participants, setParticipants] = useState([]);
+  useEffect(() => {
+    props.onCountChange(participants.length);
+
+    return () => {
+      props.onCountChange(0);
+    }
+  }, [participants]);
 
   return (
     <div id="container" className="container">

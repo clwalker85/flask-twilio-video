@@ -1,0 +1,19 @@
+#chat.hidden {
+    display: none;
+}
+#chat.displayed {
+    width: calc(100% - 10px);
+    display: grid;
+    grid-template-rows: auto 30px;
+    border-left: 1px solid black;
+    padding: 5px;
+}
+#chat #chat-scroll {
+    overflow: auto;
+}
+#chat #chat-content {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    line-height: 1em;
+    max-height: 1px;
+}
