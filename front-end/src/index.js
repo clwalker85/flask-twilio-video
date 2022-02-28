@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import Video from 'twilio-video'
 
-import { login } from './proxies/twilio'
+import { login, getAllParticipants, disconnectAllParticipants } from './proxies/twilio'
 import ParticipantList from './ParticipantList'
 import Conversation from './Conversation'
 
@@ -21,6 +21,7 @@ function App() {
 
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [participantStatusList, setParticipantStatusList] = useState([]);
   useEffect(() => {
     // TODO - Add better validation than an alert or a silent block
     if (isConnecting && !!username) {
@@ -29,6 +30,22 @@ function App() {
         setConversationSID(data.conversation_sid);
         return Video.connect(data.token);
       }).then((_room) => {
+        _room.on('disconnected', () => { setIsDisconnecting(true); });
+        _room.on('participantConnected', () => {
+          getAllParticipants().then((data) => {
+            setParticipantStatusList(data.participants);
+          });
+        });
+        _room.on('participantDisonnected', () => {
+          getAllParticipants().then((data) => {
+            setParticipantStatusList(data.participants);
+          });
+        });
+
+        getAllParticipants().then((data) => {
+          setParticipantStatusList(data.participants);
+        });
+
         setRoom(_room);
         setIsConnected(true);
       }).catch(e => console.log(e)).finally(() => {
@@ -104,8 +121,32 @@ function App() {
   }
   const handleChatDisplayChange = (isOn) => setIsChatDisplayed(isOn);
 
+  const [isDisconnectingAllParticipants, setIsDisconnectingAllParticipants] = useState(false);
+  const handleDisconnectAll = (e) => {
+    e.preventDefault();
+    setIsDisconnectingAllParticipants(true);
+  }
+  useEffect(() => {
+    if (isDisconnectingAllParticipants) {
+      disconnectAllParticipants().then((data) => {
+        setIsDisconnecting(true);
+      }).catch(e => console.log(e)).finally(() => {
+        setIsDisconnectingAllParticipants(false);
+      });
+    }
+  }, [isDisconnectingAllParticipants]);
+
+  const statusList = (isConnected ? (
+    <ul>
+      {participantStatusList.map((p,_) => {
+        return (<li><b>{p.identity}</b> - {p.status}</li>)
+      })}
+    </ul>
+  ) : "");
+
   return (<>
     <h1>Flask/React/Twilio Video Conference</h1>
+    {statusList}
     <form>
       <label for="username">Name: </label>
       <input type="text" name="username" id="username" value={username} onChange={handleUsernameChange} />
@@ -118,6 +159,9 @@ function App() {
       </button>
       <button id="toggle_chat" onClick={handleChatToggle} disabled={!isConnected}>
         Toggle chat
+      </button>
+      <button id="disconnect_all" onClick={handleDisconnectAll} disabled={!isConnected}>
+        Disconnect all
       </button>
     </form>
 

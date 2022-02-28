@@ -54,5 +54,31 @@ def login():
             'conversation_sid': conversation.sid}
 
 
+@app.route('/participants', methods=['GET'])
+def fetchAllParticipants():
+    room = twilio_client.video.rooms('My Room')
+    participants = []
+    try:
+        for p in room.participants.list(status='connected'):
+            pObj = p.fetch()
+            participants.append({ 'identity': pObj.identity, 'status': pObj.status })
+    except TwilioRestException as exc:
+        raise
+
+    return {'participants': participants}
+
+
+@app.route('/participants', methods=['DELETE'])
+def disconnectAllParticipants():
+    room = twilio_client.video.rooms('My Room')
+    try:
+        for p in room.participants.list(status='connected'):
+            p.update(status='disconnected')
+    except TwilioRestException as exc:
+        raise
+
+    return ('', 200)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

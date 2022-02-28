@@ -21,6 +21,7 @@ function ParticipantList(props) {
             track = publication.track;
           }
         });
+        props.onCountChange(participants.length + 1);
         setParticipants([...participants, {
           sid: connectedParticipant.sid,
           label: connectedParticipant.identity,
@@ -29,6 +30,7 @@ function ParticipantList(props) {
       }
     }
     const participantDisconnected = (disconnectedParticipant) => {
+      props.onCountChange(participants.length - 1);
       setParticipants(participants.filter(p => p.sid !== disconnectedParticipant.sid));
     }
 
