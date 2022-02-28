@@ -66,11 +66,36 @@ function App() {
   }
 
   const [isScreenShared, setIsScreenShared] = useState(false);
-  const handleScreenShareToggle = () => {
+  const handleScreenShareToggle = (e) => {
     e.preventDefault();
     setIsScreenShared(!isScreenShared);
   }
-  const handleScreenShareDisplayChange = (isOn) => setIsScreenShared(isOn);
+  const shareScreenButtonText = isScreenShared ? "Stop sharing" : "Share screen";
+
+  const [screenTrack, setScreenTrack] = useState(null);
+  useEffect(() => {
+    const disconnectScreenShare = () => {
+      if (screenTrack) {
+        room.localParticipant.unpublishTrack(screenTrack);
+        screenTrack.stop();
+        setScreenTrack(null);
+      }
+      setIsScreenShared(false);
+    }
+
+    if (screenTrack && !isScreenShared) {
+      disconnectScreenShare();
+    }
+    else if (!screenTrack && isScreenShared) {
+      navigator.mediaDevices.getDisplayMedia().then(stream => {
+        const _screenTrack = new Video.LocalVideoTrack(stream.getTracks()[0]);
+        room.localParticipant.publishTrack(_screenTrack);
+        _screenTrack.mediaStreamTrack.onended = disconnectScreenShare;
+        setScreenTrack(_screenTrack);
+      });
+      // TODO - Add better UI when we catch an error
+    }
+  }, [isScreenShared]);
 
   const [isChatDisplayed, setIsChatDisplayed] = useState(false);
   const handleChatToggle = (e) => {
@@ -89,7 +114,7 @@ function App() {
         {joinLeaveButtonText}
       </button>
       <button id="share_screen" onClick={handleScreenShareToggle} disabled={!isConnected}>
-        Share screen
+        {shareScreenButtonText}
       </button>
       <button id="toggle_chat" onClick={handleChatToggle} disabled={!isConnected}>
         Toggle chat
