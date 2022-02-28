@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect, useRef } from 'react'
+import ReactDOM from 'react-dom'
 import { Client } from '@twilio/conversations'
+import { Button, Input } from 'antd'
 
-import './Conversation.css';
+import './Conversation.css'
 
 function Conversation(props) {
   const [messages, setMessages] = useState([]);
@@ -71,7 +72,7 @@ function Conversation(props) {
           <div ref={conversationEndRef}></div>
         </div>
       </div>
-      <input id="chat-input" type="text" onKeyDown={handleKeyDown} />
+      <Input id="chat-input" type="text" onKeyDown={handleKeyDown} placeholder="Enter chat here" />
     </div>
   );
 }

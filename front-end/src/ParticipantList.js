@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect, useRef } from 'react'
+import ReactDOM from 'react-dom'
 import { createLocalVideoTrack } from 'twilio-video'
 
-import './ParticipantList.css';
+import './ParticipantList.css'
 
 function ParticipantList(props) {
   const [participants, setParticipants] = useState([]);

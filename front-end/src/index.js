@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect } from 'react'
+import ReactDOM from 'react-dom'
 import Video from 'twilio-video'
+import { Typography, Form, Button, Space, Input, List } from 'antd'
+const { Title, Text } = Typography
 
 import { login, getAllParticipants, disconnectAllParticipants } from './proxies/twilio'
 import ParticipantList from './ParticipantList'
 import Conversation from './Conversation'
 
-import './index.css';
+import 'antd/dist/antd.css'
+import './index.css'
 
 function App() {
   const [token, setToken] = useState(null);
@@ -23,7 +26,6 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [participantStatusList, setParticipantStatusList] = useState([]);
   useEffect(() => {
-    // TODO - Add better validation than an alert or a silent block
     if (isConnecting && !!username) {
       login(username).then((data) => {
         setToken(data.token);
@@ -137,35 +139,41 @@ function App() {
   }, [isDisconnectingAllParticipants]);
 
   const statusList = (isConnected ? (
-    <ul>
-      {participantStatusList.map((p,_) => {
-        return (<li><b>{p.identity}</b> - {p.status}</li>)
-      })}
-    </ul>
+    <List size="small" bordered dataSource={participantStatusList}
+      renderItem={p => <List.Item><b>{p.identity}</b> - {p.status}</List.Item>} />
   ) : "");
 
   return (<>
-    <h1>Flask/React/Twilio Video Conference</h1>
-    {statusList}
-    <form>
-      <label for="username">Name: </label>
-      <input type="text" name="username" id="username" value={username} onChange={handleUsernameChange} />
+    <Title level={3}>Flask/React/Twilio Video Conference</Title>
 
-      <button id="join_leave" onClick={handleTwilioConnectToggle} disabled={isConnecting}>
-        {joinLeaveButtonText}
-      </button>
-      <button id="share_screen" onClick={handleScreenShareToggle} disabled={!isConnected}>
-        {shareScreenButtonText}
-      </button>
-      <button id="toggle_chat" onClick={handleChatToggle} disabled={!isConnected}>
-        Toggle chat
-      </button>
-      <button id="disconnect_all" onClick={handleDisconnectAll} disabled={!isConnected}>
-        Disconnect all
-      </button>
-    </form>
+    <Space direction="vertical" size="large">
+      <ParticipantCountDisplay isConnected={isConnected} participantCount={participantCount} />
 
-    <ParticipantCountDisplay isConnected={isConnected} participantCount={participantCount} />
+      {statusList}
+
+      <Form layout="inline">
+        <Form.Item name="username" label="Username"
+            rules={[{ required: true, message: "Username is required to connect" }]}>
+          <Input type="text" name="username" id="username" onChange={handleUsernameChange}
+            placeholder="Enter username here" value={username} />
+        </Form.Item>
+
+        <Space size="small">
+          <Button id="join_leave" type="primary" onClick={handleTwilioConnectToggle} disabled={isConnecting}>
+            {joinLeaveButtonText}
+          </Button>
+          <Button id="share_screen" onClick={handleScreenShareToggle} disabled={!isConnected}>
+            {shareScreenButtonText}
+          </Button>
+          <Button id="toggle_chat" onClick={handleChatToggle} disabled={!isConnected}>
+            Toggle chat
+          </Button>
+          <Button id="disconnect_all" type="danger" onClick={handleDisconnectAll} disabled={!isConnected}>
+            Disconnect all
+          </Button>
+        </Space>
+      </Form>
+    </Space>
 
     <div id="root" className={(isChatDisplayed ? 'chat-displayed' : 'chat-hidden')}>
 
@@ -184,6 +192,8 @@ function App() {
 ReactDOM.render(<App />, document.getElementById('twilio-conference-app')); 
 
 function ParticipantCountDisplay({ isConnected, participantCount }) {
-  const countText = isConnected ? `${participantCount} participants online.` : "Disconnected.";
-  return (<p id="count">{countText}</p>);
+  const isPlural = participantCount > 1;
+  const descriptor = isPlural ? "participants" : "participant";
+  const countText = isConnected ? `${participantCount} ${descriptor} online` : "Disconnected";
+  return (<Text secondary id="count">{countText}</Text>);
 }
