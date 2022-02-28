@@ -8,9 +8,11 @@ function Conversation(props) {
   const [messages, setMessages] = useState([]);
   const [chat, setChat] = useState(null);
   useEffect(() => {
-    Client.create(props.token).then((_chat) => {
-      setChat(_chat);
-    }).catch((e) => { console.log(e) });
+    if (props.token) {
+      Client.create(props.token).then((_chat) => {
+        setChat(_chat);
+      }).catch((e) => console.log(e));
+    }
 
     return () => {
       if (chat) {

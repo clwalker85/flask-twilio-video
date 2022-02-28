@@ -30,9 +30,8 @@ function App() {
         return Video.connect(data.token);
       }).then((_room) => {
         setRoom(_room);
-        // TODO - handle participants
         setIsConnected(true);
-      }).catch(e => { console.log(e); }).finally(() => {
+      }).catch(e => console.log(e)).finally(() => {
         setIsConnecting(false);
       });
     }
@@ -48,6 +47,7 @@ function App() {
       setToken(null);
       setConversationSID(null);
       setIsScreenShared(false);
+      setIsChatDisplayed(false);
       setIsConnected(false);
       setIsDisconnecting(false);
     }
@@ -80,10 +80,10 @@ function App() {
   const handleChatDisplayChange = (isOn) => setIsChatDisplayed(isOn);
 
   return (<>
-    <h1>Flask & Twilio Video Conference</h1>
+    <h1>Flask/React/Twilio Video Conference</h1>
     <form>
       <label for="username">Name: </label>
-      <input type="text" id="username" value={username} onChange={handleUsernameChange} />
+      <input type="text" name="username" id="username" value={username} onChange={handleUsernameChange} />
 
       <button id="join_leave" onClick={handleTwilioConnectToggle} disabled={isConnecting}>
         {joinLeaveButtonText}
@@ -100,7 +100,7 @@ function App() {
 
     <div id="root" className={(isChatDisplayed ? 'chat-displayed' : 'chat-hidden')}>
 
-      <ParticipantList onCountChange={handleCountChange} />
+      <ParticipantList room={room} onCountChange={handleCountChange} />
 
       <Conversation
         token={token}
