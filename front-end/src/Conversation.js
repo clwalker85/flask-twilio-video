@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Client } from '@twilio/conversations'
-import { Button, Input } from 'antd'
+import { Form, Input } from 'antd'
 
 import './Conversation.css'
 
@@ -30,7 +30,7 @@ function Conversation(props) {
     if (chat && props.conversationSID) {
       chat.getConversationBySid(props.conversationSID).then((_conv) => {
         _conv.on('messageAdded', (m) => {
-          setMessages(messages.push({ author: m.author, body: m.body }));
+          setMessages(prevMessages => [...prevMessages, { author: m.author, body: m.body }]);
         });
 
         _conv.getMessages().then((_messages) => {
@@ -48,17 +48,17 @@ function Conversation(props) {
     }
   }, [chat, props.conversationSID]);
 
+  const [form] = Form.useForm();
   const conversationEndRef = useRef();
   useEffect(() => {
     if (props.isChatDisplayed) {
       conversationEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [props.isChatDisplayed]);
+  }, [messages, props.isChatDisplayed]);
   const handleKeyDown = (e) => {
     if (e.keyCode == 13) {
       conversation.sendMessage(e.target.value);
-      e.target.value = "";
-      conversationEndRef.current.scrollIntoView({ behavior: 'smooth' })
+      form.resetFields();
     }
   };
 
@@ -66,13 +66,23 @@ function Conversation(props) {
     <div id="chat" className={(props.isChatDisplayed ? 'displayed' : 'hidden')}>
       <div id="chat-scroll">
         <div id="chat-content">
-          {messages.map((m,_) => {
-            return (<p><b>{m.author}</b>: {m.body}</p>)
+          {messages.map((m,index) => {
+            if (index === messages.length - 1) {
+              return (
+                <p ref={index === messages.length - 1 ? conversationEndRef : ""}>
+                  <b>{m.author}</b>: {m.body}
+                </p>
+              );
+            }
+            return (<p><b>{m.author}</b>: {m.body}</p>);
           })}
-          <div ref={conversationEndRef}></div>
         </div>
       </div>
-      <Input id="chat-input" type="text" onKeyDown={handleKeyDown} placeholder="Enter chat here" />
+      <Form form={form}>
+        <Form.Item name="chatMessageBox">
+          <Input id="chat-input" type="text" onKeyDown={handleKeyDown} placeholder="Enter chat here" />
+        </Form.Item>
+      </Form>
     </div>
   );
 }
