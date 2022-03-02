@@ -21,7 +21,6 @@ function ParticipantList(props) {
             track = publication.track;
           }
         });
-        props.onCountChange(participants.length + 1);
         setParticipants([...participants, {
           sid: connectedParticipant.sid,
           label: connectedParticipant.identity,
@@ -30,7 +29,6 @@ function ParticipantList(props) {
       }
     }
     const participantDisconnected = (disconnectedParticipant) => {
-      props.onCountChange(participants.length - 1);
       setParticipants(participants.filter(p => p.sid !== disconnectedParticipant.sid));
     }
 
@@ -39,11 +37,10 @@ function ParticipantList(props) {
       props.room.on('participantConnected', participantConnected);
       props.room.on('participantDisconnected', participantDisconnected);
     }
+    else {
+      setParticipants(participants.filter(p => p.sid == 'local'));
+    }
   }, [props.token, props.room]);
-  useEffect(() => {
-    props.onCountChange(participants.length);
-    return () => props.onCountChange(0);
-  }, [participants]);
 
   const [zoomedInParticipantSID, setZoomedInParticipantSID] = useState(null);
   const handleVideoClick = (sid) => {
@@ -60,7 +57,7 @@ function ParticipantList(props) {
       {participants.map((p,_) => {
         return <Participant participant={p}
           isZoomedIn={(p.sid == zoomedInParticipantSID)}
-          isHidden={(p.sid != "local" && p.sid != zoomedInParticipantSID)}
+          isHidden={(zoomedInParticipantSID != null && p.sid != zoomedInParticipantSID)}
           onVideoClick={handleVideoClick} />
       })}
     </div>
@@ -74,7 +71,7 @@ function Participant({ participant, isZoomedIn, isHidden, onVideoClick }) {
       participant.track.attach(videoRef.current);
       return () => participant.track.detach();
     }
-  }, []);
+  }, [participant.track]);
 
   let participantClassList = "participant ";
   if (isZoomedIn) {

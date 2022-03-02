@@ -16,9 +16,6 @@ function App() {
   const [conversationSID, setConversationSID] = useState(null);
   const [room, setRoom] = useState(null);
 
-  const [participantCount, setParticipantCount] = useState(0);
-  const handleCountChange = (count) => setParticipantCount(count);
-
   const [username, setUsername] = useState("");
   const handleUsernameChange = (e) => setUsername(e.target.value);
 
@@ -64,6 +61,7 @@ function App() {
     if (isDisconnecting) {
       room.disconnect();
       setToken(null);
+      setRoom(null);
       setConversationSID(null);
       setIsScreenShared(false);
       setIsChatDisplayed(false);
@@ -147,8 +145,6 @@ function App() {
     <Title level={3}>Flask/React/Twilio Video Conference</Title>
 
     <Space direction="vertical" size="large">
-      <ParticipantCountDisplay isConnected={isConnected} participantCount={participantCount} />
-
       {statusList}
 
       <Form layout="inline">
@@ -177,7 +173,7 @@ function App() {
 
     <div id="root" className={(isChatDisplayed ? 'chat-displayed' : 'chat-hidden')}>
 
-      <ParticipantList room={room} onCountChange={handleCountChange} />
+      <ParticipantList room={room} />
 
       <Conversation
         token={token}
@@ -190,10 +186,3 @@ function App() {
 }
 
 ReactDOM.render(<App />, document.getElementById('twilio-conference-app')); 
-
-function ParticipantCountDisplay({ isConnected, participantCount }) {
-  const isPlural = participantCount > 1;
-  const descriptor = isPlural ? "participants" : "participant";
-  const countText = isConnected ? `${participantCount} ${descriptor} online` : "Disconnected";
-  return (<Text secondary id="count">{countText}</Text>);
-}
