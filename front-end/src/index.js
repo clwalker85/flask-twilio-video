@@ -35,7 +35,7 @@ function App() {
             setParticipantStatusList(data.participants);
           });
         });
-        _room.on('participantDisonnected', () => {
+        _room.on('participantDisconnected', () => {
           getAllParticipants().then((data) => {
             setParticipantStatusList(data.participants);
           });

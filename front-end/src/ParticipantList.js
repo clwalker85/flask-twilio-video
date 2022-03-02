@@ -8,25 +8,13 @@ function ParticipantList(props) {
   const [participants, setParticipants] = useState([]);
   useEffect(() => {
     createLocalVideoTrack().then((track) => {
-      setParticipants([{ sid: "local", label: "Me", track: track }]);
+      setParticipants([{ sid: "local", identity: "Me", track: track }]);
     });
     return () => setParticipants(participants.filter(p => p.sid == 'local'));
   }, [props.token]);
   useEffect(() => {
     const participantConnected = (connectedParticipant) => {
-      if (connectedParticipant.tracks) {
-        let track = null;
-        connectedParticipant.tracks.forEach(publication => {
-          if (publication.isSubscribed) {
-            track = publication.track;
-          }
-        });
-        setParticipants([...participants, {
-          sid: connectedParticipant.sid,
-          label: connectedParticipant.identity,
-          track: track
-        }]);
-      }
+      setParticipants([...participants, connectedParticipant]);
     }
     const participantDisconnected = (disconnectedParticipant) => {
       setParticipants(participants.filter(p => p.sid !== disconnectedParticipant.sid));
@@ -67,11 +55,15 @@ function ParticipantList(props) {
 function Participant({ participant, isZoomedIn, isHidden, onVideoClick }) {
   const videoRef = useRef();
   useEffect(() => {
+    if (participant.on) {
+      participant.on('trackSubscribed', track => track.attach(videoRef.current));
+      participant.on('trackUnsubscribed', track => track.detach());
+    }
     if (participant.track) {
       participant.track.attach(videoRef.current);
       return () => participant.track.detach();
     }
-  }, [participant.track]);
+  }, []);
 
   let participantClassList = "participant ";
   if (isZoomedIn) {
@@ -83,11 +75,11 @@ function Participant({ participant, isZoomedIn, isHidden, onVideoClick }) {
 
   return (
     <div className={participantClassList} id={participant.sid}>
-      <div className={(isZoomedIn ? "trackZoomed" : "")}>
+      <div>
         <video className={(isZoomedIn ? "trackZoomed" : "")}
-          ref={videoRef} autoPlay={true} onClick={() => onVideoClick(participant.sid)} />
+          ref={videoRef} autoplay={true} onClick={() => onVideoClick(participant.sid)} />
       </div>
-      <div className="label">{participant.label}</div>
+      <div className="label">{participant.identity}</div>
     </div>
   );
 }
